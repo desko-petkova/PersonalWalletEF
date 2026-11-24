@@ -41,6 +41,8 @@ namespace PersonalWallet.ConsoleUI
             ui.Run();
 
         }
+    }
+}
 
        
 
