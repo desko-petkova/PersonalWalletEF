@@ -1,10 +1,13 @@
 ﻿namespace PersonalWallet.Domain.ValueObjects
 {
+    using System.Text.Json.Serialization;
     public class Money
     {
         public decimal Amount { get; }
 
         public Money() { }
+
+        [JsonConstructor]
         public Money(decimal amount)
         {
             if (amount < 0)

@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using PersonalWallet.Application;
 using PersonalWallet.Application.Interfices;
+using PersonalWallet.Infrastructure;
 using PersonalWallet.Infrastructure.EFData;
 
 namespace PersonalWallet.ConsoleUI
@@ -15,26 +16,26 @@ namespace PersonalWallet.ConsoleUI
 
             //IAccountRepository accountRepo = new SqlAccountRepository(context);
             //ITransactionRepository transactionRepo = new SqlTransactionRepository(context);
-            var options = new DbContextOptionsBuilder<AppDbContext>()
-    .UseSqlServer(
-        "Server=(localdb)\\MSSQLLocalDB;Database=WalletDb;Trusted_Connection=True;TrustServerCertificate=True;")
-    .Options;
+    //        var options = new DbContextOptionsBuilder<AppDbContext>()
+    //.UseSqlServer(
+    //    "Server=(localdb)\\MSSQLLocalDB;Database=WalletDb;Trusted_Connection=True;TrustServerCertificate=True;")
+    //.Options;
 
-            using var context = new AppDbContext(options);
+    //        using var context = new AppDbContext(options);
 
-            context.Database.EnsureCreated();
+    //        context.Database.EnsureCreated();
 
-            IAccountRepository accountRepo = new EfAccountRepository(context);
-            ITransactionRepository transactionRepo = new EfTransactionRepository(context);
+    //        IAccountRepository accountRepo = new EfAccountRepository(context);
+    //        ITransactionRepository transactionRepo = new EfTransactionRepository(context);
+
+           // var service = new WalletService(accountRepo, transactionRepo);
+
+            var storage = new FileStorage("wallet.json");
+
+            IAccountRepository accountRepo = new FileAccountRepository(storage);
+            ITransactionRepository transactionRepo = new FileTransactionRepository(storage);
 
             var service = new WalletService(accountRepo, transactionRepo);
-
-            //var storage = new FileStorage("wallet.json");
-
-            //IAccountRepository accountRepo = new FileAccountRepository(storage);
-            //ITransactionRepository transactionRepo = new FileTransactionRepository(storage);
-
-            //var service = new WalletService(accountRepo, transactionRepo);
 
             var ui = new WalletConsoleUI(service);
 

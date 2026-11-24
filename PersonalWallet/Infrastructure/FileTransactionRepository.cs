@@ -14,19 +14,19 @@ namespace PersonalWallet.Infrastructure
 
         public void Save(Transaction transaction)
         {
-            if (transaction == null)
-                throw new ArgumentNullException(nameof(transaction));
+            if(transaction == null)
+        throw new ArgumentNullException(nameof(transaction));
+
+            if (transaction.Id != 0)
+                throw new InvalidOperationException(
+                    "Транзакцията вече има идентификатор.");
 
             var db = storage.Load();
 
-            var newTransaction = new Transaction(
-               // db.NextId++,
-                transaction.AccountId,
-                transaction.Type,
-                transaction.Amount,
-                transaction.Date);
+            transaction.AssignId(db.NextId);
+            db.NextId++;
 
-            db.Transactions.Add(newTransaction);
+            db.Transactions.Add(transaction);
 
             storage.Save(db);
         }
@@ -35,18 +35,12 @@ namespace PersonalWallet.Infrastructure
         {
             var db = storage.Load();
 
-            //return db.Transactions
-            //    .Where(t => t.AccountId == accountId)
-            //    .ToList();
-            List<Transaction> result = new List<Transaction>();
+            var result = db.Transactions
+                .Where(t => t.AccountId == accountId)
+                .ToList();
 
-            foreach (var transaction in db.Transactions)
-            {
-                if (transaction.AccountId == accountId)
-                {
-                    result.Add(transaction);
-                }
-            }
+            if (result.Count == 0)
+                throw new ArithmeticException("Account not found");
 
             return result;
         }

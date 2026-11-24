@@ -51,6 +51,7 @@ namespace PersonalWallet.Application
 
         public void CreateAccount(string name, AccountType type, decimal initialAmount)
         {
+            
             var account = new Account(
                 
                 name,

@@ -16,17 +16,11 @@ namespace PersonalWallet.Infrastructure
         {
             var db = storage.Load();
 
-            // return db.Accounts.First(a => a.Id == id);
+            var account = db.Accounts.First(a => a.Id == id);
 
-            foreach (var account in db.Accounts)
-            {
-                if(account.Id == id)
-                {
-                    return account;
-                }
-            }
+            if(account == null) throw new Exception("Account not found");
 
-            throw new Exception("Account not found");
+            return account;
             
         }
 
@@ -42,47 +36,45 @@ namespace PersonalWallet.Infrastructure
             if (account == null)
                 throw new ArgumentNullException(nameof(account));
 
+            if (account.Id != 0)
+                throw new InvalidOperationException(
+                    "Използвайте Update за съществуваща сметка.");
+
             var db = storage.Load();
 
-            if (account.Id == 0)
-            {
-                if (string.IsNullOrWhiteSpace(account.Name))
-                    throw new Exception("Account name is missing before save.");
+            account.AssignId(db.NextId);
+            db.NextId++;
 
-                var newAccount = new Account(
-                  //  db.NextId++,
-                    account.Name,
-                    account.Type,
-                    account.Balance);
+            db.Accounts.Add(account);
 
-                db.Accounts.Add(newAccount);
-            }
-            else
-            {
-                bool found = false;
-
-                for (int i = 0; i < db.Accounts.Count; i++)
-                {
-                    if (db.Accounts[i].Id == account.Id)
-                    {
-                        db.Accounts[i] = account;
-                        found = true;
-                        break;
-                    }
-                }
-
-                if (!found)
-                {
-                    throw new Exception("Account not found.");
-                }
-            }
             storage.Save(db);
 
         }
 
         public void Update(Account account)
         {
-            throw new NotImplementedException();
+
+            if (account == null)
+                throw new ArgumentNullException(nameof(account));
+
+            if (account.Id <= 0)
+                throw new ArgumentException(
+                    "Сметката трябва да има положителен идентификатор.");
+
+            var db = storage.Load();
+
+            for (int i = 0; i < db.Accounts.Count; i++)
+            {
+                if (db.Accounts[i].Id == account.Id)
+                {
+                    db.Accounts[i] = account;
+                    storage.Save(db);
+                    return;
+                }
+            }
+
+            throw new InvalidOperationException(
+                "Сметката не е намерена.");
         }
     }
 }
